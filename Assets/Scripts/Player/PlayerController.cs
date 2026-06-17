@@ -22,6 +22,13 @@ public class PlayerController : MonoBehaviour
     public AudioClip deathSound;
     public AudioClip gemSound;
 
+    public AudioClip jumpSound;
+    public AudioClip runningSound;
+
+    private bool wasMoving = false;
+    private float runningTimer = 0f;
+    public float runningInterval = 0.5f;
+
     [Header("Spawn")]
     public Transform startPoint;
     [SerializeField] private ResetTrigger resetTrigger;
@@ -57,7 +64,9 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float slowZoneJumpSpeed = 4f;
 
     private MyStack<CheckpointData> checkpointStack = new MyStack<CheckpointData>();
-
+    
+    private float runningSoundTimer = 0f;
+    public float runningSoundInterval = 0.8f;
     private void Awake()
     {
         stateMachine = new StateMachine();
@@ -124,7 +133,31 @@ public class PlayerController : MonoBehaviour
         animator.SetBool("IsGrounded", groundController.IsGrounded);
 
         UpdateAnimation();
+        bool isMoving =
+     playerInputController != null &&
+     playerInputController.MovementInputVector.magnitude > 0.1f;
 
+
+        if (isMoving)
+        {
+            runningTimer += Time.deltaTime;
+
+            if (runningTimer >= runningInterval)
+            {
+                if (audioSource != null && runningSound != null)
+                {
+                    audioSource.PlayOneShot(runningSound, 0.2f);
+                }
+
+                runningTimer = 0f;
+            }
+        }
+        else
+        {
+            runningTimer = 0f;
+        }
+
+        wasMoving = isMoving;
     }
 
     private void FixedUpdate()
@@ -218,9 +251,13 @@ public class PlayerController : MonoBehaviour
     {
         if (groundController != null && groundController.IsGrounded)
         {
-
             jumpQueued = true;
             jumpTriggered = true;
+
+            if (audioSource != null && jumpSound != null)
+            {
+                audioSource.PlayOneShot(jumpSound, 0.3f);
+            }
         }
     }
 

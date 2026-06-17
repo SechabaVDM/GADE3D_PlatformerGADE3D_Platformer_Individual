@@ -18,11 +18,20 @@ public class DoubleJump : MonoBehaviour
     {
         if (other.CompareTag("Player"))
         {
+            if (SFXManager.Instance != null)
+            {
+                SFXManager.Instance.PlaySound("pickup");
+            }
+
             Rigidbody rb = other.GetComponent<Rigidbody>();
 
             if (rb != null)
             {
-                rb.linearVelocity = new Vector3(rb.linearVelocity.x, jumpForce, rb.linearVelocity.z);
+                rb.linearVelocity = new Vector3(
+                    rb.linearVelocity.x,
+                    jumpForce,
+                    rb.linearVelocity.z
+                );
             }
 
             StartCoroutine(RespawnRoutine());
